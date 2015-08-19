@@ -1,16 +1,14 @@
 package com.piasy.testunderstand.rx;
 
+import java.util.Arrays;
+import java.util.List;
 import junit.framework.Assert;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
-
-import java.util.Arrays;
-import java.util.List;
-
 import rx.Observable;
 import rx.Subscriber;
+import rx.functions.Func0;
 import rx.observers.TestSubscriber;
 
 /**
@@ -117,7 +115,38 @@ public class HotColdObservableTest {
         subscriber1.assertCompleted();
         subscriber1.assertNoErrors();
         subscriber1.assertValue(mock);
-        Mockito.verify(mMockIntProducer, Mockito.only()).produce();
+        Mockito.verify(mMockIntProducer).produce();
+
+        TestSubscriber<Integer> subscriber2 = new TestSubscriber<>();
+        observable.subscribe(subscriber2);
+        subscriber2.awaitTerminalEvent();
+        subscriber2.assertCompleted();
+        subscriber2.assertNoErrors();
+        subscriber2.assertValue(mock);
+        Mockito.verify(mMockIntProducer, Mockito.times(2)).produce();
+    }
+
+    @Test
+    public void verifyDeferAsCold() {
+        final int mock = 5;
+        Mockito.when(mMockIntProducer.produce()).thenReturn(mock);
+
+        Mockito.verify(mMockIntProducer, Mockito.never()).produce();
+        Observable<Integer> observable = Observable.defer(new Func0<Observable<Integer>>() {
+            @Override
+            public Observable<Integer> call() {
+                return Observable.just(mMockIntProducer.produce());
+            }
+        });
+        Mockito.verify(mMockIntProducer, Mockito.never()).produce();
+
+        TestSubscriber<Integer> subscriber1 = new TestSubscriber<>();
+        observable.subscribe(subscriber1);
+        subscriber1.awaitTerminalEvent();
+        subscriber1.assertCompleted();
+        subscriber1.assertNoErrors();
+        subscriber1.assertValue(mock);
+        Mockito.verify(mMockIntProducer).produce();
 
         TestSubscriber<Integer> subscriber2 = new TestSubscriber<>();
         observable.subscribe(subscriber2);
@@ -134,7 +163,5 @@ public class HotColdObservableTest {
             // won't really call
             return 0;
         }
-
     }
-
 }
