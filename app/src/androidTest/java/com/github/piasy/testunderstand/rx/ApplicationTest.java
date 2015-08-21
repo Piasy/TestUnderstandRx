@@ -1,4 +1,4 @@
-package com.piasy.testunderstand.rx;
+package com.github.piasy.testunderstand.rx;
 
 import android.app.Application;
 import android.test.ApplicationTestCase;

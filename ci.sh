@@ -1,2 +1,2 @@
 #!/bin/sh
-./gradlew :app:test
+./gradlew clean :app:test

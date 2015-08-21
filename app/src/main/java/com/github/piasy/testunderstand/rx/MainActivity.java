@@ -1,4 +1,4 @@
-package com.piasy.testunderstand.rx;
+package com.github.piasy.testunderstand.rx;
 
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
