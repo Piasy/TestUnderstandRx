@@ -1,6 +1,5 @@
 package com.github.piasy.testunderstand.rx;
 
-import android.support.annotation.NonNull;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.Executor;
@@ -180,12 +179,12 @@ public class HotColdObservableTest {
                     public void call(Subscriber<? super Integer> subscriber) {
                         for (int i = 0; i < 8; i++) {
                             subscriber.onNext(mMockIntProducer.produce());
-                            sleep(1000);
+                            Utils.sleep(1000);
                         }
                         subscriber.onCompleted();
                     }
                 }).replay();
-        sleep(2000);
+        Utils.sleep(2000);
         then(mMockIntProducer).should(never()).produce();
 
         TestSubscriber<Integer> subscriber1 = new TestSubscriber<>(new Subscriber<Integer>() {
@@ -207,7 +206,7 @@ public class HotColdObservableTest {
         observable.subscribe(subscriber1);
         observable.connect();
 
-        sleep(2500);
+        Utils.sleep(2500);
         TestSubscriber<Integer> subscriber2 = new TestSubscriber<>(new Subscriber<Integer>() {
             @Override
             public void onCompleted() {
@@ -262,17 +261,17 @@ public class HotColdObservableTest {
                     public void call(Subscriber<? super Integer> subscriber) {
                         for (int i = 0; i < 8; i++) {
                             subscriber.onNext(mMockIntProducer.produce());
-                            sleep(1000);
+                            Utils.sleep(1000);
                         }
                         subscriber.onCompleted();
                     }
                 }).subscribeOn(Schedulers.from(new Executor() {
                     @Override
-                    public void execute(@NonNull Runnable command) {
+                    public void execute(Runnable command) {
                         new Thread(command).start();
                     }
                 })).replay();
-        sleep(2000);
+        Utils.sleep(2000);
         then(mMockIntProducer).should(never()).produce();
 
         TestSubscriber<Integer> subscriber1 = new TestSubscriber<>(new Subscriber<Integer>() {
@@ -294,7 +293,7 @@ public class HotColdObservableTest {
         Subscription subscription1 = observable.subscribe(subscriber1);
         observable.connect();
 
-        sleep(2500);
+        Utils.sleep(2500);
         TestSubscriber<Integer> subscriber2 = new TestSubscriber<>(new Subscriber<Integer>() {
             @Override
             public void onCompleted() {
@@ -344,13 +343,6 @@ public class HotColdObservableTest {
         then(mMockIntProducer).should(times(8)).produce();
     }
 
-    private void sleep(long millis) {
-        try {
-            Thread.sleep(millis);
-        } catch (InterruptedException e) {
-            // ignore
-        }
-    }
 
     private interface MockIntProducer {
         int produce();
