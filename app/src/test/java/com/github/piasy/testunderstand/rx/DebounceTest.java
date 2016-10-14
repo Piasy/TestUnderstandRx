@@ -3,8 +3,6 @@ package com.github.piasy.testunderstand.rx;
 import java.util.concurrent.TimeUnit;
 import org.junit.Before;
 import org.junit.Test;
-import rx.functions.Action0;
-import rx.functions.Action1;
 import rx.observers.TestSubscriber;
 import rx.schedulers.Schedulers;
 import rx.schedulers.Timestamped;
@@ -31,21 +29,12 @@ public class DebounceTest {
 
         mSource.subscribeOn(Schedulers.computation())
                 .timestamp()
-                .doOnNext(new Action1<Timestamped<Integer>>() {
-                    @Override
-                    public void call(Timestamped<Integer> item) {
-                        System.out.println(
-                                "" + item.getValue() + " emitted at " + item.getTimestampMillis());
-                    }
-                })
+                .doOnNext(item -> System.out.println(
+                        "" + item.getValue() + " emitted at " + item.getTimestampMillis()))
                 .debounce(100, TimeUnit.MILLISECONDS)
                 .timestamp()
-                .doOnSubscribe(new Action0() {
-                    @Override
-                    public void call() {
-                        System.out.println("subscribed at " + System.currentTimeMillis());
-                    }
-                })
+                .doOnSubscribe(
+                        () -> System.out.println("subscribed at " + System.currentTimeMillis()))
                 .subscribe(mSubscriber);
 
         System.out.println("debounce:");
@@ -58,21 +47,12 @@ public class DebounceTest {
 
         mSource.subscribeOn(Schedulers.computation())
                 .timestamp()
-                .doOnNext(new Action1<Timestamped<Integer>>() {
-                    @Override
-                    public void call(Timestamped<Integer> item) {
-                        System.out.println(
-                                "" + item.getValue() + " emitted at " + item.getTimestampMillis());
-                    }
-                })
+                .doOnNext(item -> System.out.println(
+                        "" + item.getValue() + " emitted at " + item.getTimestampMillis()))
                 .throttleFirst(100, TimeUnit.MILLISECONDS)
                 .timestamp()
-                .doOnSubscribe(new Action0() {
-                    @Override
-                    public void call() {
-                        System.out.println("subscribed at " + System.currentTimeMillis());
-                    }
-                })
+                .doOnSubscribe(
+                        () -> System.out.println("subscribed at " + System.currentTimeMillis()))
                 .subscribe(mSubscriber);
 
         System.out.println("throttleFirst:");
@@ -85,21 +65,12 @@ public class DebounceTest {
 
         mSource.subscribeOn(Schedulers.computation())
                 .timestamp()
-                .doOnNext(new Action1<Timestamped<Integer>>() {
-                    @Override
-                    public void call(Timestamped<Integer> item) {
-                        System.out.println(
-                                "" + item.getValue() + " emitted at " + item.getTimestampMillis());
-                    }
-                })
+                .doOnNext(item -> System.out.println(
+                        "" + item.getValue() + " emitted at " + item.getTimestampMillis()))
                 .throttleLast(100, TimeUnit.MILLISECONDS)
                 .timestamp()
-                .doOnSubscribe(new Action0() {
-                    @Override
-                    public void call() {
-                        System.out.println("subscribed at " + System.currentTimeMillis());
-                    }
-                })
+                .doOnSubscribe(
+                        () -> System.out.println("subscribed at " + System.currentTimeMillis()))
                 .subscribe(mSubscriber);
 
         System.out.println("throttleLast:");

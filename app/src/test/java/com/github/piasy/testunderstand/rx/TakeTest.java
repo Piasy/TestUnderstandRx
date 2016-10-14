@@ -1,14 +1,10 @@
 package com.github.piasy.testunderstand.rx;
 
-import android.support.annotation.NonNull;
-import java.util.concurrent.Executor;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import rx.Subscription;
-import rx.functions.Action0;
-import rx.functions.Func1;
 import rx.observers.TestSubscriber;
 import rx.schedulers.Schedulers;
 import rx.subjects.ReplaySubject;
@@ -29,31 +25,20 @@ public class TakeTest {
         ReplaySubject<Integer> subject = ReplaySubject.create();
         TestSubscriber<Integer> subscriber = new TestSubscriber<>();
 
-        Subscription subscription =
-                subject.asObservable().subscribeOn(Schedulers.from(new Executor() {
-                    @Override
-                    public void execute(@NonNull Runnable command) {
-                        System.out.println("start subscriber thread");
-                        new Thread(command).start();
-                    }
-                })).doOnSubscribe(new Action0() {
-                    @Override
-                    public void call() {
-                        System.out.println("doOnSubscribe");
-                    }
-                }).doOnUnsubscribe(new Action0() {
-                    @Override
-                    public void call() {
-                        System.out.println("doOnUnsubscribe");
-                    }
-                }).filter(new Func1<Integer, Boolean>() {
-                    @Override
-                    public Boolean call(Integer integer) {
-                        System.out.println("filter: " + integer);
-                        mEventTracker.track();
-                        return integer > 5;
-                    }
-                }).first().subscribe(subscriber);
+        Subscription subscription = subject.asObservable()
+                .subscribeOn(Schedulers.from(command -> {
+                    System.out.println("start subscriber thread");
+                    new Thread(command).start();
+                }))
+                .doOnSubscribe(() -> System.out.println("doOnSubscribe"))
+                .doOnUnsubscribe(() -> System.out.println("doOnUnsubscribe"))
+                .filter(integer -> {
+                    System.out.println("filter: " + integer);
+                    mEventTracker.track();
+                    return integer > 5;
+                })
+                .first()
+                .subscribe(subscriber);
 
         System.out.println("start emit");
         System.out.println("to subscribe 1, unsubscribed? " + subscription.isUnsubscribed());
@@ -86,30 +71,20 @@ public class TakeTest {
         ReplaySubject<Integer> subject = ReplaySubject.create();
         TestSubscriber<Integer> subscriber = new TestSubscriber<>();
 
-        Subscription subscription = subject.subscribeOn(Schedulers.from(new Executor() {
-            @Override
-            public void execute(@NonNull Runnable command) {
-                System.out.println("start subscriber thread");
-                new Thread(command).start();
-            }
-        })).doOnSubscribe(new Action0() {
-            @Override
-            public void call() {
-                System.out.println("doOnSubscribe");
-            }
-        }).doOnUnsubscribe(new Action0() {
-            @Override
-            public void call() {
-                System.out.println("doOnUnsubscribe");
-            }
-        }).filter(new Func1<Integer, Boolean>() {
-            @Override
-            public Boolean call(Integer integer) {
-                System.out.println("filter: " + integer);
-                mEventTracker.track();
-                return integer > 5;
-            }
-        }).take(1).subscribe(subscriber);
+        Subscription subscription = subject.asObservable()
+                .subscribeOn(Schedulers.from(command -> {
+                    System.out.println("start subscriber thread");
+                    new Thread(command).start();
+                }))
+                .doOnSubscribe(() -> System.out.println("doOnSubscribe"))
+                .doOnUnsubscribe(() -> System.out.println("doOnUnsubscribe"))
+                .filter(integer -> {
+                    System.out.println("filter: " + integer);
+                    mEventTracker.track();
+                    return integer > 5;
+                })
+                .take(1)
+                .subscribe(subscriber);
 
         System.out.println("start emit");
         System.out.println("to subscribe 1, unsubscribed? " + subscription.isUnsubscribed());

@@ -2,7 +2,6 @@ package com.github.piasy.testunderstand.rx;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.Executor;
 import junit.framework.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -10,7 +9,6 @@ import org.mockito.Mockito;
 import rx.Observable;
 import rx.Subscriber;
 import rx.Subscription;
-import rx.functions.Func0;
 import rx.observables.ConnectableObservable;
 import rx.observers.TestSubscriber;
 import rx.schedulers.Schedulers;
@@ -143,12 +141,8 @@ public class HotColdObservableTest {
         given(mMockIntProducer.produce()).willReturn(mock);
 
         then(mMockIntProducer).should(never()).produce();
-        Observable<Integer> observable = Observable.defer(new Func0<Observable<Integer>>() {
-            @Override
-            public Observable<Integer> call() {
-                return Observable.just(mMockIntProducer.produce());
-            }
-        });
+        Observable<Integer> observable = Observable.defer(
+                () -> Observable.just(mMockIntProducer.produce()));
         then(mMockIntProducer).should(never()).produce();
 
         TestSubscriber<Integer> subscriber1 = new TestSubscriber<>();
@@ -265,12 +259,7 @@ public class HotColdObservableTest {
                         }
                         subscriber.onCompleted();
                     }
-                }).subscribeOn(Schedulers.from(new Executor() {
-                    @Override
-                    public void execute(Runnable command) {
-                        new Thread(command).start();
-                    }
-                })).replay();
+                }).subscribeOn(Schedulers.from(command -> new Thread(command).start())).replay();
         Utils.sleep(2000);
         then(mMockIntProducer).should(never()).produce();
 
