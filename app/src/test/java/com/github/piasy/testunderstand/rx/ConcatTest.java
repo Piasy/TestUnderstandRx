@@ -4,7 +4,6 @@ import android.util.Log;
 import org.junit.Test;
 import rx.Observable;
 import rx.Subscriber;
-import rx.android.schedulers.AndroidSchedulers;
 import rx.observers.TestSubscriber;
 import rx.schedulers.Schedulers;
 
@@ -15,6 +14,14 @@ import static android.content.ContentValues.TAG;
  */
 
 public class ConcatTest {
+    private static Observable<Integer> local() {
+        return Observable.just(1, 2, 3);
+    }
+
+    private static Observable<Integer> remote() {
+        return Observable.error(new RuntimeException("Error"));
+    }
+
     @Test
     public void testConcatWithError() {
         TestSubscriber<Integer> subscriber = new TestSubscriber<>(new Subscriber<Integer>() {
@@ -30,41 +37,51 @@ public class ConcatTest {
 
             @Override
             public void onNext(Integer integer) {
-                System.out.println("subscriber.onNext: " + integer + " #" + Thread.currentThread().getName());
+                System.out.println(
+                        "subscriber.onNext: " + integer + " #" + Thread.currentThread().getName());
             }
         });
         Observable.concat(
                 local()
-                        .doOnSubscribe(() -> System.out.println("local().doOnSubscribe #" + Thread.currentThread().getName()))
-                        .doOnNext(integer -> System.out.println("local().doOnNext: " + integer + " #" + Thread.currentThread().getName()))
-                        .doOnCompleted(() -> System.out.println("local().doOnCompleted #" + Thread.currentThread().getName()))
-                        .doOnUnsubscribe(() -> System.out.println("local().doOnUnsubscribe #" + Thread.currentThread().getName()))
-                        .doOnError(e -> System.out.println("local().doOnError #" + Thread.currentThread().getName())),
+                        .doOnSubscribe(() -> System.out.println(
+                                "local().doOnSubscribe #" + Thread.currentThread().getName()))
+                        .doOnNext(integer -> System.out.println(
+                                "local().doOnNext: " + integer + " #" + Thread.currentThread()
+                                        .getName()))
+                        .doOnCompleted(() -> System.out.println(
+                                "local().doOnCompleted #" + Thread.currentThread().getName()))
+                        .doOnUnsubscribe(() -> System.out.println(
+                                "local().doOnUnsubscribe #" + Thread.currentThread().getName()))
+                        .doOnError(e -> System.out.println(
+                                "local().doOnError #" + Thread.currentThread().getName())),
                 remote()
-                        .doOnSubscribe(() -> System.out.println("remote().doOnSubscribe #" + Thread.currentThread().getName()))
-                        .doOnNext(integer -> System.out.println("remote().doOnNext: " + integer + " #" + Thread.currentThread().getName()))
-                        .doOnCompleted(() -> System.out.println("remote().doOnCompleted #" + Thread.currentThread().getName()))
-                        .doOnUnsubscribe(() -> System.out.println("remote().doOnUnsubscribe #" + Thread.currentThread().getName()))
-                        .doOnError(e -> System.out.println("remote().doOnError #" + Thread.currentThread().getName())))
-                .doOnSubscribe(() -> System.out.println("concat().doOnSubscribe #" + Thread.currentThread().getName()))
-                .doOnNext(integer -> System.out.println("concat().doOnNext: " + integer + " #" + Thread.currentThread().getName()))
-                .doOnCompleted(() -> System.out.println("concat().doOnCompleted #" + Thread.currentThread().getName()))
-                .doOnUnsubscribe(() -> System.out.println("concat().doOnUnsubscribe #" + Thread.currentThread().getName()))
-                .doOnError(e -> System.out.println("concat().doOnError #" + Thread.currentThread().getName()))
+                        .doOnSubscribe(() -> System.out.println(
+                                "remote().doOnSubscribe #" + Thread.currentThread().getName()))
+                        .doOnNext(integer -> System.out.println(
+                                "remote().doOnNext: " + integer + " #" + Thread.currentThread()
+                                        .getName()))
+                        .doOnCompleted(() -> System.out.println(
+                                "remote().doOnCompleted #" + Thread.currentThread().getName()))
+                        .doOnUnsubscribe(() -> System.out.println(
+                                "remote().doOnUnsubscribe #" + Thread.currentThread().getName()))
+                        .doOnError(e -> System.out.println(
+                                "remote().doOnError #" + Thread.currentThread().getName())))
+                .doOnSubscribe(() -> System.out.println(
+                        "concat().doOnSubscribe #" + Thread.currentThread().getName()))
+                .doOnNext(integer -> System.out.println(
+                        "concat().doOnNext: " + integer + " #" + Thread.currentThread().getName()))
+                .doOnCompleted(() -> System.out.println(
+                        "concat().doOnCompleted #" + Thread.currentThread().getName()))
+                .doOnUnsubscribe(() -> System.out.println(
+                        "concat().doOnUnsubscribe #" + Thread.currentThread().getName()))
+                .doOnError(e -> System.out.println(
+                        "concat().doOnError #" + Thread.currentThread().getName()))
                 .subscribeOn(Schedulers.io())
                 .observeOn(Schedulers.newThread())
                 .subscribe(subscriber);
         subscriber.awaitTerminalEvent();
         subscriber.assertValues(1, 2, 3);
         subscriber.assertError(RuntimeException.class);
-    }
-
-    private static Observable<Integer> local() {
-        return Observable.just(1, 2, 3);
-    }
-
-    private static Observable<Integer> remote() {
-        return Observable.error(new RuntimeException("Error"));
     }
 
     @Test
@@ -78,7 +95,7 @@ public class ConcatTest {
         });
         Observable.concat(local, remote2)
                 .subscribeOn(Schedulers.newThread())
-                .observeOn(AndroidSchedulers.mainThread())
+                .observeOn(Schedulers.io())
                 .subscribe(new Subscriber<Integer>() {
                     @Override
                     public void onCompleted() {

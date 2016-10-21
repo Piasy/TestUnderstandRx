@@ -1,16 +1,22 @@
 # Disabling sudo moves build to the Container Based Infrastructure on Travis CI
-sudo: false
+sudo: required
 
 language: android
 jdk: oraclejdk8
 
 android:
   components:
-    - android-21
-    - android-22
-    - build-tools-22.0.1
+    - tools # to get the new `repository-11.xml`
+    - tools # see https://github.com/travis-ci/travis-ci/issues/6040#issuecomment-219367943)
+    - platform-tools
+    - build-tools-24.0.2
+    - android-24
+    - extra-google-m2repository
     - extra-android-m2repository
-    - extra-android-support
+  licenses:
+    - android-sdk-license-.+
+    - android-sdk-preview-license-.+
+    - google-gdk-license-.+
 
 script:
   - sh ci.sh

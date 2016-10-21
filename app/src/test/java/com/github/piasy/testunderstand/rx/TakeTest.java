@@ -63,7 +63,7 @@ public class TakeTest {
         System.out.println("awaitTerminalEvent");
 
         // all event will go to filter operator, even the observable is unsubscribed
-        verify(mEventTracker, times(8)).track();
+        verify(mEventTracker, times(4)).track();
     }
 
     @Test
@@ -109,7 +109,7 @@ public class TakeTest {
         System.out.println("awaitTerminalEvent");
 
         // all event will go to filter operator, even the observable is unsubscribed
-        verify(mEventTracker, times(8)).track();
+        verify(mEventTracker, times(4)).track();
     }
 
     interface EventTracker {

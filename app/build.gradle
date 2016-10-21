@@ -3,14 +3,15 @@ apply plugin: 'com.ofg.uptodate'
 apply plugin: 'me.tatarka.retrolambda'
 
 android {
-    compileSdkVersion 24
-    buildToolsVersion "24.0.1"
+    compileSdkVersion rootProject.ext.androidCompileSdkVersion
+    buildToolsVersion rootProject.ext.androidBuildToolsVersion
 
     defaultConfig {
-        minSdkVersion 15
-        targetSdkVersion 24
-        versionCode 1
-        versionName "1.0"
+        applicationId "com.github.piasy.testunderstand.rx"
+        minSdkVersion rootProject.ext.minSdkVersion
+        targetSdkVersion rootProject.ext.targetSdkVersion
+        versionCode rootProject.ext.releaseVersionCode
+        versionName rootProject.ext.releaseVersionName
     }
 
     compileOptions {
@@ -28,8 +29,8 @@ android {
 }
 
 dependencies {
-    compile 'com.android.support:appcompat-v7:24.2.0'
-    compile 'com.android.support:support-annotations:24.2.0'
+    compile "com.android.support:appcompat-v7:$rootProject.ext.androidSupportSdkVersion"
+
     compile 'io.reactivex:rxjava:1.1.10'
     compile ('io.reactivex:rxandroid:1.2.1') {
         exclude module: 'rxjava'

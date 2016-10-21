@@ -87,19 +87,39 @@ public class SchedulerTest {
     public void testZip4() {
         Observable<Integer> odd = Observable
                 .<Integer>create(subscriber -> {
-                    System.out.println("create 1 from " + Thread.currentThread().getName());
+                    logThread("create 1");
                     subscriber.onNext(1);
                     subscriber.onCompleted();
-                })
-                .observeOn(Schedulers.computation());
+                });
         Observable<Integer> even = Observable
                 .<Integer>create(subscriber -> {
-                    System.out.println("create 2 from " + Thread.currentThread().getName());
+                    logThread("create 2");
                     subscriber.onNext(2);
                     subscriber.onCompleted();
+                });
+        Observable.zip(odd,
+                even.observeOn(Schedulers.computation()),
+                this::add)
+                .observeOn(Schedulers.io())
+                .map(this::triple)
+                .subscribeOn(Schedulers.io())
+                .observeOn(Schedulers.computation())
+                .subscribe(this::print);
+        Utils.sleep(2000);
+    }
+
+    @Test
+    public void testCreateAsync() {
+        Observable
+                .<Integer>create(subscriber -> {
+                    logThread("OnSubscribe#call");
+                    new AsyncEmitter(value -> {
+                        logThread("emit");
+                        subscriber.onNext(value);
+                        subscriber.onCompleted();
+                    }).asyncEmit();
                 })
-                .observeOn(Schedulers.computation());
-        Observable.zip(odd, even, this::add)
+                .filter(this::odd)
                 .observeOn(Schedulers.io())
                 .map(this::triple)
                 .subscribeOn(Schedulers.io())
@@ -141,5 +161,27 @@ public class SchedulerTest {
 
     private void print(Integer i) {
         System.out.println("print " + i + " from " + Thread.currentThread().getName());
+    }
+
+    private void logThread(String message) {
+        System.out.println(message + " from " + Thread.currentThread().getName());
+    }
+
+    interface Receiver {
+        void onValue(int value);
+    }
+
+    private static class AsyncEmitter {
+        private final Receiver mReceiver;
+
+        private AsyncEmitter(Receiver receiver) {
+            mReceiver = receiver;
+        }
+
+        void asyncEmit() {
+            new Thread(() -> {
+                mReceiver.onValue(1);
+            }, "AsyncEmitter emit thread").start();
+        }
     }
 }
